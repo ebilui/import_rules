@@ -47,7 +47,7 @@ function odawara_shaping($contents)
 	$top_header_arr = array();
 	$under_header_arr = array();
 	foreach ($contents as $key => $value) {
-		if (5 >= $key) continue;
+		if ($key <= 5) continue;
 		// 1行目のヘッダーと1行目のヘッダーの改行後の文字を2行目のヘッダーに入れる
 		if ($key == 6) {
 			$replace_data = preg_replace('/\r\n|\r|\n/', '', $value);
@@ -78,7 +78,7 @@ function sumidaku_shaping($contents)
 	$top_line = array();
 	$under_line = array();
 	foreach ($contents as $key => $value) {
-		if (2 > $key) continue;
+		if ($key <= 1) continue;
 		if ($key % 2 == 0) {
 			$replace_data = preg_replace('/\r\n|\r|\n/', '', $value);
 			$top_line = explode(',', $replace_data);
@@ -116,12 +116,18 @@ function nakanoku_shaping($contents)
 
 function suginamiku_shaping($contents)
 {
-	// $data = array();
+	$data = array();
 
-	// foreach ($contents as $key => $value) {
-	// 	$data_array = explode(',', $value);
+	$last_line = array_key_last($contents);
+	foreach ($contents as $key => $value) {
+		if ($key <= 0) continue;
+		if ($key == $last_line) continue;
+		$data_array = explode(',', $value);
+		array_splice($data_array, 0, 11);
+		$data[] = implode(',', $data_array);
+	}
 
-	// }
+	return $data;
 }
 
 function line_delete($contents, $which_line)
