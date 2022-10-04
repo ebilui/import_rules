@@ -12,20 +12,20 @@ foreach ($file_names as $file_name) {
 	output_data($file_name, $data);
 }
 
-
 // ファイル名で動かす関数を決める
 function data_shaping($file_name, $contents)
 {
+	if (strpos($file_name, '鹿児島県_鹿児島県一括')) return kagoshima_shaping($file_name);
+	if (strpos($file_name, '東京都_目黒区保健所')) return meguroku_shaping($file_name);
+
 	global $first_line_delete, $two_line_delete, $three_line_delete;
 	$no_blank_data = delete_blank_line($contents);
-
 	if (strpos($file_name, '小田原')) return odawara_shaping($no_blank_data);
 	if (strpos($file_name, '東京都_墨田区保健所')) return sumidaku_shaping($no_blank_data);
 	if (strpos($file_name, '東京都_中野区保健所')) return nakanoku_shaping($no_blank_data);
 	if (strpos($file_name, '東京都_杉並区保健所')) return suginamiku_shaping($no_blank_data);
 	if (strpos($file_name, '東京都_板橋区保健所')) return itabashiku_shaping($no_blank_data);
 	if (strpos($file_name, '東京都_葛飾区保健所')) return katushikaku_shaping($no_blank_data);
-	if (strpos($file_name, '鹿児島県_鹿児島県一括')) return kagoshima_shaping($file_name);
 	if (preg_match($first_line_delete, $file_name)) return line_delete($no_blank_data, 1);
 	if (preg_match($two_line_delete, $file_name)) return line_delete($no_blank_data, 2);
 	if (preg_match($three_line_delete, $file_name)) return line_delete($no_blank_data, 3);
@@ -34,6 +34,12 @@ function data_shaping($file_name, $contents)
 // 空行削除
 function delete_blank_line($contents)
 {
+	// set_error_handler(function($errno, $errstr, $errfile, $errline) {
+	// 	if (!(error_reporting() & $errno)) {
+	// 		return;
+	// 	}
+	// 	throw new ErrorException($errstr, $errno, 0, $errfile, $errline);
+	// });
 	foreach ($contents as $value) {
 		if (preg_match('/[^,\n\s]/', $value)) $data[] = $value;
 	}
@@ -181,9 +187,56 @@ function katushikaku_shaping($contents)
 function kagoshima_shaping($file_name)
 {
 	$file = fopen("original_data/${file_name}", "r");
-	while($data = fgetcsv($file)){
-		$implode_data = implode(',', $data);
+	$i = 0;
+	while($csv = fgetcsv($file)){
+		$array_data[] = $csv;
 	}
+	
+	$last_line = array_key_last($array_data);
+	for ($i=0; $i < count($array_data); $i++) { 
+		if ($i == 0) continue;
+		if ($i == 1) {
+			$array_data[$i][2] .= "\n";
+			$array_data[$i][3] .= "\n";
+			$array_data[$i][4] .= "\n";
+		}
+		if (strpos($array_data[$i][3], "\n")) {
+			$is_nl = $i == $last_line ? "" : "\n";
+			$implode_data = implode(',', $array_data[$i]);
+			$data[] = preg_replace('/\r\n|\r|\n/', ',', $implode_data) . $is_nl;
+		} else {
+			$is_nl = $i+1 == $last_line ? "" : "\n";
+			$array_data[$i][3] = $array_data[$i + 1][3];
+			array_splice($array_data[$i], 3, 0, '');
+			array_splice($array_data[$i], 3, 0, '');
+			$implode_data = implode(',', $array_data[$i]);
+			$data[] = preg_replace('/\r\n|\r|\n/', ',', $implode_data) . $is_nl;
+			$i++;
+		}
+	}
+
+	return $data;
+}
+
+function meguroku_shaping($file_name)
+{
+	$data = array();
+
+	$file = fopen("original_data/${file_name}", "r");
+	$i = 0;
+	while($csv = fgetcsv($file)){
+		$array_data[] = $csv;
+	}
+
+	$last_line = array_key_last($array_data);
+	for ($i=0; $i < count($array_data); $i++) { 
+		if ($i == 0) continue;
+		$is_nl = $i == $last_line ? "" : "\n";
+		$implode_data = implode(',', $array_data[$i]);
+		$data[] = preg_replace('/\r\n|\r|\n/', ',', $implode_data) . $is_nl;
+	}
+
+	return $data;
 }
 
 function line_delete($contents, $which_line)

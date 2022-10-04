@@ -37,9 +37,7 @@ try {
             $csv[0][$key] = $value['macci_name'];
         }
         fclose($fp);
-        // var_dump($csv);
         $csv[0] = implode(',', $csv[0]) . "\n";
-        var_dump($csv[0]);
     
         // 同じファイル名があれば削除
         if ((file_exists("change_koumoku/maccikoumoku_${file}"))) {
