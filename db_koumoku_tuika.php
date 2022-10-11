@@ -40,28 +40,26 @@ function single_csv($fp) {
 }
 
 
-function get_column_name($single_csv, $name, $used_koumoku) {
+function get_column_name($single_csv, $koumoku, $already_used) {
     // 項目名が「ここまで」って書いてあるとこまでの項目名を取得
     $kokomade = array_search('ここまで', $single_csv[2]);
     for ($i=0; $i < $kokomade; $i++) { 
         $macci_name = '';
         $gaibu_name = '';
-        // 住所０のやつは、マクロを使う用の項目名だからスキップする
-        if(($single_csv[2][$i] != '施設-住所0' || $single_csv[2][$i] != '申請-住所0') && $single_csv[3][$i] != '') {
-            $macci_name = $single_csv[2][$i];
-            $gaibu_name = $single_csv[3][$i];
-            if (array_key_exists($macci_name, $name)) {
-                if (!in_array($gaibu_name, $used_koumoku)) {
-                    $name[$macci_name] = $name[$macci_name] . ' ' . $gaibu_name;
-                    $used_koumoku[] = $gaibu_name;
-                }
-            } else {
-                $name[$macci_name] = $gaibu_name;
-                $used_koumoku[] = $gaibu_name;
-            }
+        // 元データ項目名が空のと、住所0のやつは、マクロを使う用の項目名だからスキップする
+        if(($single_csv[2][$i] == '施設-住所0' || $single_csv[2][$i] == '申請-住所0') && $single_csv[3][$i] == '') continue;
+        $macci_name = $single_csv[2][$i];
+        $gaibu_name = $single_csv[3][$i];
+        if (in_array($gaibu_name, $already_used)) continue;
+        if (array_key_exists($macci_name, $koumoku)) {
+            $koumoku[$macci_name] = $koumoku[$macci_name] . ',' . $gaibu_name;
+            $already_used[] = $gaibu_name;
+        } else {
+            $koumoku[$macci_name] = $gaibu_name;
+            $already_used[] = $gaibu_name;
         }
     }
-    return array($name, $used_koumoku);
+    return array($koumoku, $already_used);
 }
 
 

@@ -39,14 +39,14 @@ try {
         fclose($fp);
         $csv[0] = implode(',', $csv[0]) . "\n";
     
+        $file = str_replace('pickup_', '', $file);
         // 同じファイル名があれば削除
-        if ((file_exists("change_koumoku/maccikoumoku_${file}"))) {
-			unlink("change_koumoku/maccikoumoku_${file}");
+        if ((file_exists("change_koumoku/macci_${file}"))) {
+            unlink("change_koumoku/macci_${file}");
 			echo "${file}を削除しました\n";
 		}
         // // ファイル保存
-        $file = str_replace('pickup_', '', $file);
-        file_put_contents("change_koumoku/maccikoumoku_${file}", $csv, FILE_APPEND | LOCK_EX);
+        file_put_contents("change_koumoku/macci_${file}", $csv, FILE_APPEND | LOCK_EX);
         // return;
     }
 
@@ -97,11 +97,11 @@ function get_macci_name($csv, $pdo) {
     return $mc;
 }
 
-function overwrite_csv($file, $csv) {
-    $fw = fopen($file, 'w');
-    foreach ($csv as $value) {
-        fputcsv($fw, $value);
-    }
-    fclose($fw);
-}
+// function overwrite_csv($file, $csv) {
+//     $fw = fopen($file, 'w');
+//     foreach ($csv as $value) {
+//         fputcsv($fw, $value);
+//     }
+//     fclose($fw);
+// }
 ?>

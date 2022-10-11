@@ -8,6 +8,5 @@ function macro01() {
     while ($data = fgetcsv($fp)) {
         $csv[] = $data;
     }
-    var_dump('a');
 }
 ?>
